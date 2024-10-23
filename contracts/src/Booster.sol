@@ -40,7 +40,7 @@ contract Booster is ERC721, Ownable {
         _burn(boosterId);
     }
     
-    function redeemBooster(uint256 boosterId, address to) external {
+    function redeemBooster(uint256 boosterId, address to) external payable  {
         require(boosterId < boosterCount, "list null");
         require(ownerOf(boosterId) == msg.sender, "You do not own this booster");
 
