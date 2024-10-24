@@ -30,21 +30,7 @@ app.post('/mint-card', async (req, res) => {
   try {
     const response = await axios.get(apiUrl);
     const cardData = response.data;
-    const nftData = {
-      name: cardData.name,
-      set: cardData.set.name,
-      supertype: cardData.supertype,
-      subtypes: cardData.subtypes,
-      imageUrl: cardData.images.large,
-      rarity: cardData.rarity,
-      price: cardData.tcgplayer.prices.holofoil.market,
-      abilities: cardData.abilities.map(a => a.name),
-      attacks: cardData.attacks.map(a => ({
-        name: a.name,
-        damage: a.damage,
-        text: a.text
-      }))
-    };
+
     const tx = await contract.mintCardForUser(collectionId, cardData.images.large, user);
     await tx.wait(); // Attendre que la transaction soit minée
     res.json({ success: true, transaction: tx });
