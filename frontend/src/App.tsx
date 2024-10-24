@@ -52,11 +52,15 @@ export const App = () => {
   const fetchCard = async () => {
     try {
       const response = await fetch(`http://localhost:3000/card/${cardId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
       const data = await response.json();
+      console.log(data)
       setCard({
         cardNumber: data.cardNumber,
         img: data.image || "No Image",
-        gid: data.gid,  // Assuming it's part of the metadata
+        gid: data.id,  
         cardOwner: data.cardOwner,
       });
     } catch (error) {

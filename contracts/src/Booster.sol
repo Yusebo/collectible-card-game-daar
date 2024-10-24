@@ -20,8 +20,9 @@ contract Booster is ERC721, Ownable {
     constructor() ERC721("Booster", "BOOST") Ownable(msg.sender) {}
 
     function createBooster(string memory _set_name, uint256 set_card , uint256 total_card, string memory img, uint256 price) external onlyOwner {
-        boosters[boosterCount++] = BoosterDetails(_set_name, set_card, total_card, img, price);
-        _mint(msg.sender, boosterCount++); 
+        boosters[boosterCount] = BoosterDetails(_set_name, set_card, total_card, img, price);
+        _mint(msg.sender, boosterCount); 
+        boosterCount++;
     }
 
     function openBooster(uint256 boosterId, Collection collection) external {
@@ -32,9 +33,9 @@ contract Booster is ERC721, Ownable {
 
         for (uint256 i = 0; i < booster.total_card; i++) {
             
-            uint256 cardId = uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender))) % booster.set_card ;
+            uint256 cardId = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, msg.sender))) % booster.set_card ;
             string memory str = concatStringAndUint(booster.set_name, cardId) ;
-            collection.mintCard(str , cardId);
+            collection.mintCard(str);
         }
 
         _burn(boosterId);
@@ -46,7 +47,7 @@ contract Booster is ERC721, Ownable {
 
         BoosterDetails memory booster = boosters[boosterId];
 
-        require(msg.value >= boosters[boosterId].price, "Insufficient payment for the booster");
+        require(msg.value >= booster.price, "Insufficient payment for the booster");
         safeTransferFrom(msg.sender, to, boosterId);
     }
 

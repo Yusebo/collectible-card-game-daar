@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const Web3 = require('web3');
 const app = express();
@@ -7,22 +8,44 @@ const cors = require('cors');
 const { contractAddress, contractAbi } = require('./config');
 
 
-
 app.use(cors());
 app.use(express.json());
+
+if (!process.env.RPC_URL || !process.env.PRIVATE_KEY ) {
+  console.error('Les variables d\'environnement RPC_URL, PRIVATE_KEY et POKEMON_TCG_API_KEY doivent être définies');
+  process.exit(1);
+}
 
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 const contract = new ethers.Contract(contractAddress, contractAbi, signer);
 
+const apiurl = "https://api.pokemontcg.io/v2/"
 
 
 
 app.post('/mint-card', async (req, res) => {
-  const { collectionId, img, id, user } = req.body;
-
+  const { collectionId, cardId, user } = req.body;
+  const apiUrl = `https://api.pokemontcg.io/v2/cards/${cardId}`;
   try {
-    const tx = await contract.mintCardForUser(collectionId, img, id, user);
+    const response = await axios.get(apiUrl);
+    const cardData = response.data;
+    const nftData = {
+      name: cardData.name,
+      set: cardData.set.name,
+      supertype: cardData.supertype,
+      subtypes: cardData.subtypes,
+      imageUrl: cardData.images.large,
+      rarity: cardData.rarity,
+      price: cardData.tcgplayer.prices.holofoil.market,
+      abilities: cardData.abilities.map(a => a.name),
+      attacks: cardData.attacks.map(a => ({
+        name: a.name,
+        damage: a.damage,
+        text: a.text
+      }))
+    };
+    const tx = await contract.mintCardForUser(collectionId, cardData.images.large, user);
     await tx.wait(); // Attendre que la transaction soit minée
     res.json({ success: true, transaction: tx });
   } catch (error) {
@@ -32,7 +55,7 @@ app.post('/mint-card', async (req, res) => {
 
 app.get('/card/:id', async (req, res) => {
   const nftId = req.params.id;
-  
+  console.log(nftId)
   try {
     // Call the smart contract to get the NFT information
     const nftInfo = await contract.getCardInfo(nftId).call();

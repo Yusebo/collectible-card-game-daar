@@ -37,10 +37,10 @@ contract Main is Ownable {
         collectionCount++;
     }
 
-    function mintCardForUser(uint256 collect_id, string memory img, uint256 id, address user) external onlyOwner {
+    function mintCardForUser(uint256 collect_id, string memory img, address user) external onlyOwner {
         CollectionInfo storage collectionInfo = collections[collect_id];
         require(collect_id < collectionCount, "list null");
-        Collection(collectionInfo.collectionAddress).mintCardtoOther(img, id, user);
+        Collection(collectionInfo.collectionAddress).mintCardtoOther(img, user);
     }
 
     function getCollection(uint256 _id) external view returns (string memory, uint256, address) {

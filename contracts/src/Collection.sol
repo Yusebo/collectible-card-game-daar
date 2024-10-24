@@ -26,20 +26,24 @@ contract Collection is ERC721, Ownable {
         uint256 id;
     }
 
-    function mintCard(string memory img, uint256 id) external {
+    function mintCard(string memory img) external {
         uint256 newCardId = _tokenIds;
         _mint(msg.sender, newCardId);
-        _tokenIds++;
-        Card memory newCard = Card({cardNumber: newCardId, img: img, id: id});
+        
+        Card memory newCard = Card({cardNumber: newCardId, img: img, id: _tokenIds});
         cards[newCardId] = newCard;
+        
+        _tokenIds++;
     }
 
-    function mintCardtoOther(string memory img, uint256 id, address to) external {
+    function mintCardtoOther(string memory img, address to) external {
         uint256 newCardId = _tokenIds;
         _mint(to, newCardId);
-        _tokenIds++;
-        Card memory newCard = Card({cardNumber: newCardId, img: img, id: id});
+        
+        Card memory newCard = Card({cardNumber: newCardId, img: img, id: _tokenIds});
         cards[newCardId] = newCard;
+        
+        _tokenIds++;
     }
 
     function getCardInfo(uint256 tokenId) external view returns (string memory img, uint256 cardNumber, uint256 id, address owner) {
