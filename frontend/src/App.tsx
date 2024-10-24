@@ -93,15 +93,43 @@ export const App = () => {
     };
 
     // Handle collection creation
-    const handleCreateCollection = (name: string, count: number) => {
+    const handleCreateCollection = async (name: string, count: number) => {
         console.log('Creating collection:', { name, count });
         // Implement API call to create a collection
+        try {
+            const response = await fetch('http://localhost:3000/createcollection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, count }),
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error creating collection:', error);
+        }
     };
 
     // Handle card minting
-    const handleMintCard = (collectionId: string, cardId: string) => {
+    const handleMintCard = async (collectionId: string, cardId: string) => {
         console.log('Minting card:', { collectionId, cardId });
         // Implement API call to mint a card
+        try {
+            const response = await fetch('http://localhost:3000/mint-card', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ collectionId, cardId }),
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error minting card:', error);
+        }
     };
 
     return (
