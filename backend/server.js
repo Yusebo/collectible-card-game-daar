@@ -12,9 +12,11 @@ app.use(cors());
 app.use(express.json());
 
 if (!process.env.RPC_URL || !process.env.PRIVATE_KEY ) {
-  console.error('Les variables d\'environnement RPC_URL, PRIVATE_KEY et POKEMON_TCG_API_KEY doivent être définies');
+  console.error('Les variables d\'environnement RPC_URL, PRIVATE_KEY');
   process.exit(1);
 }
+
+console.log(contractAddress)
 
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
@@ -26,7 +28,7 @@ const apiurl = "https://api.pokemontcg.io/v2/"
 
 app.post('/mint-card', async (req, res) => {
   const { collectionId, cardId, user } = req.body;
-  const apiUrl = `https://api.pokemontcg.io/v2/cards/${cardId}`;
+  const apiUrl = `https://api.pokemontcg.io/v2/cards/base1-${cardId}`;
   try {
     const response = await axios.get(apiUrl);
     const cardData = response.data;
