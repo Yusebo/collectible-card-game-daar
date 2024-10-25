@@ -16,46 +16,108 @@ if (!process.env.RPC_URL || !process.env.PRIVATE_KEY ) {
   process.exit(1);
 }
 
-console.log(contractAddress)
 
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-const contract = new ethers.Contract(contractAddress, contractAbi, signer);
+const contract = new ethers.Contract(process.env.ADDRESSE_CONTRAT, contractAbi, signer);
+
+
 
 const apiurl = "https://api.pokemontcg.io/v2/"
 
 
 
 app.post('/mint-card', async (req, res) => {
-  const { collectionId, cardId, user } = req.body;
+  const { collectionId, cardId } = req.body;
   const apiUrl = `https://api.pokemontcg.io/v2/cards/base1-${cardId}`;
-  try {
-    const response = await axios.get(apiUrl);
-    const cardData = response.data;
 
-    const tx = await contract.mintCardForUser(collectionId, cardData.images.large, user);
-    await tx.wait(); // Attendre que la transaction soit minée
+  try {
+    const response = await fetch(apiUrl);
+    
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP ! Status: ${response.status}`);
+    }
+
+    const cardData = await response.json();
+
+    // Vérifie que les données contiennent bien l'image
+    if (!cardData.data.images || !cardData.data.images.large) {
+      throw new Error("Image de la carte non trouvée dans les données de l'API");
+    }
+
+    const tx = await contract.mintCardForUser(collectionId, cardData.data.images.large, cardId);
+    await tx.wait();
+
     res.json({ success: true, transaction: tx });
   } catch (error) {
-    res.status(500).send('Error minting card');
+    console.error('Erreur lors de la frappe de la carte:', error);
+    res.status(500).json({ success: false, message: 'Erreur lors de la frappe de la carte', error: error.message });
   }
 });
 
-app.get('/card/:id', async (req, res) => {
-  const nftId = req.params.id;
-  console.log(nftId)
+
+
+app.get('/card/:collectionId/:cardId', async (req, res) => {
+  const { collectionId, cardId } = req.params;
+  console.log('Collection ID:', collectionId);
+  console.log('Card ID:', cardId);
+  
   try {
-    // Call the smart contract to get the NFT information
-    const nftInfo = await contract.getCardInfo(nftId).call();
+    const nftInfo = await contract.get_card_in_Collection(Number(collectionId), Number(cardId));
+    
+    if (!nftInfo) {
+      return res.status(404).send('Card not found in the collection');
+    }
+
     const nftData = {
-      name: `Card #${nftInfo.cardNumber}`,
-      image: nftInfo.img || "No Image"
+      image: nftInfo.img || "No Image",
+      cardid: `Card #${nftInfo.cardId}`,
+      owner: nftInfo.owner
     };
+    
     res.json(nftData);
   } catch (error) {
+    console.error("Erreur lors de la récupération de la carte:", error);
     res.status(500).send('Error fetching NFT information');
   }
 });
+
+app.get('/card/:collectionId/:cardId', async (req, res) => {
+    const { collectionId, cardId } = req.params;
+    console.log(collectionId, cardId);
+    try {
+        const nftInfo = await contract.get_card_in_Collection(Number(collectionId), Number(cardId));
+        const nftData = {
+            image: nftInfo.img || "No Image",
+            cardid: `Card #${nftInfo.cardId}`,
+            owner: nftInfo.owner
+        };
+        res.json(nftData);
+    } catch (error) {
+        console.error("Erreur lors de la récupération de la carte:", error);
+        res.status(500).send('Error fetching NFT information');
+    }
+});
+
+
+app.get('/card/:collectionId/:cardId', async (req, res) => {
+  const { collectionId, cardId } = req.params;
+  console.log(collectionId, cardId);
+  try {
+      const nftInfo = await contract.get_card_in_Collection(Number(collectionId), Number(cardId));
+      console.error(nftInfo);
+      const nftData = {
+          image: nftInfo.img || "No Image",
+          cardid: `Card #${nftInfo.cardId}`,
+          owner: nftInfo.owner
+      };
+      res.json(nftData);
+  } catch (error) {
+      console.error("Erreur lors de la récupération de la carte:", error);
+      res.status(500).send('Error fetching NFT information');
+  }
+});
+
 
 app.post('/createcollection', async (req, res) => {
   const { name, cardCount } = req.body;

@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 
-const FetchComponent: React.FC<{ onFetchCard: (cardId: string) => void; onFetchCollection: (collectionId: string) => void; }> = ({ onFetchCard, onFetchCollection }) => {
+interface FetchComponentProps {
+  onFetchCard: (collectioncard: string, cardId: string) => void;
+  onFetchCollection: (collectionId: string) => void;
+}
+
+const FetchComponent: React.FC<FetchComponentProps> = ({ onFetchCard, onFetchCollection }) => {
     const [cardId, setCardId] = useState('');
     const [collectionId, setCollectionId] = useState('');
+    const [collectioncard, setCollectioncard] = useState('');
 
     return (
         <div>
@@ -15,10 +21,20 @@ const FetchComponent: React.FC<{ onFetchCard: (cardId: string) => void; onFetchC
                     value={cardId}
                     onChange={(e) => setCardId(e.target.value)}
                 />
-                <button onClick={() => { onFetchCard(cardId); setCardId(''); }}>Fetch Card</button>
+                <input
+                    type="text"
+                    placeholder="Enter Collection ID"
+                    value={collectioncard}
+                    onChange={(e) => setCollectioncard(e.target.value)}
+                />
+                <button onClick={() => { 
+                    onFetchCard(collectioncard, cardId); // Appel modifié
+                    setCardId(''); 
+                    setCollectioncard(''); 
+                }}>Fetch Card</button>
             </div>
             <div>
-                <h3>Fetch Collection Info</h3>
+            <h3>Fetch Collection Info</h3>
                 <input
                     type="text"
                     placeholder="Enter Collection ID"
@@ -32,3 +48,5 @@ const FetchComponent: React.FC<{ onFetchCard: (cardId: string) => void; onFetchC
 };
 
 export default FetchComponent;
+
+

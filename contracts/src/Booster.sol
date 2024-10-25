@@ -35,7 +35,7 @@ contract Booster is ERC721, Ownable {
             
             uint256 cardId = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, msg.sender))) % booster.set_card ;
             string memory str = concatStringAndUint(booster.set_name, cardId) ;
-            collection.mintCard(str);
+            collection.mintCard(str, cardId);
         }
 
         _burn(boosterId);

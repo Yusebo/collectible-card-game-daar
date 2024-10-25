@@ -51,9 +51,9 @@ export const App = () => {
     const [collection, setCollection] = useState<any>(null);
 
     // Fetch Card details
-    const fetchCard = async (cardId: string) => {
+    const fetchCard = async (collectionId: string, cardId: string) => {
         try {
-            const response = await fetch(`http://localhost:3000/card/${cardId}`);
+            const response = await fetch(`http://localhost:3000/card/${collectionId}/${cardId}`); 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -61,8 +61,8 @@ export const App = () => {
             setCard({
                 cardNumber: data.cardNumber,
                 img: data.image || "No Image",
-                gid: data.id,
-                cardOwner: data.cardOwner,
+                gid: cardId, // Utiliser le cardId passé
+                cardOwner: data.owner, // Prendre le propriétaire du NFT
             });
         } catch (error) {
             console.error('Error fetching card:', error);
@@ -93,44 +93,41 @@ export const App = () => {
     };
 
     // Handle collection creation
-    const handleCreateCollection = async (name: string, count: number) => {
-        console.log('Creating collection:', { name, count });
-        // Implement API call to create a collection
-        try {
-            const response = await fetch('http://localhost:3000/createcollection', {
+
+        const handleCreateCollection = async (name: string, cardCount: number) => {
+            try {
+              const response = await fetch('http://localhost:3000/createcollection', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                  'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, count }),
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                body: JSON.stringify({ name, cardCount }),
+              });
+              const data = await response.json();
+              console.log('Collection created:', data);
+            } catch (error) {
+              console.error('Error creating collection:', error);
             }
-        } catch (error) {
-            console.error('Error creating collection:', error);
-        }
+          
     };
 
     // Handle card minting
     const handleMintCard = async (collectionId: string, cardId: string) => {
-        console.log('Minting card:', { collectionId, cardId });
-        // Implement API call to mint a card
         try {
-            const response = await fetch('http://localhost:3000/mint-card', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ collectionId, cardId }),
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+          const response = await fetch('http://localhost:3000/mint-card', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ collectionId, cardId }),
+          });
+          const data = await response.json();
+          console.log('Card minted:', data);
         } catch (error) {
-            console.error('Error minting card:', error);
+          console.error('Error minting card:', error);
         }
     };
+    
 
     return (
         <div className={styles.body}>

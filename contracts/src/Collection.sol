@@ -14,7 +14,7 @@ contract Collection is ERC721, Ownable {
         cardCount = _cardCount;
     }
 
-    mapping(uint => Card) public cards;
+    mapping(uint256 => Card) public cards;
     mapping(uint256 => address) private tokenApprovals;
     mapping(uint256 => address) public onSelling; 
 
@@ -22,15 +22,15 @@ contract Collection is ERC721, Ownable {
 
     struct Card {
         string img;
-        uint256 cardNumber;
-        uint256 id;
+        uint256 cardId;
+        uint256 id;// token
     }
 
-    function mintCard(string memory img) external {
+    function mintCard(string memory img, uint256 _cardid) external {
         uint256 newCardId = _tokenIds;
         _mint(msg.sender, newCardId);
         
-        Card memory newCard = Card({cardNumber: newCardId, img: img, id: _tokenIds});
+        Card memory newCard = Card({cardId:  _cardid, img: img, id: newCardId});
         cards[newCardId] = newCard;
         
         _tokenIds++;
@@ -40,22 +40,22 @@ contract Collection is ERC721, Ownable {
         uint256 newCardId = _tokenIds;
         _mint(to, newCardId);
         
-        Card memory newCard = Card({cardNumber: newCardId, img: img, id: _tokenIds});
+        Card memory newCard = Card({cardId: newCardId, img: img, id: _tokenIds});
         cards[newCardId] = newCard;
         
         _tokenIds++;
     }
 
-    function getCardInfo(uint256 tokenId) external view returns (string memory img, uint256 cardNumber, uint256 id, address owner) {
+    function getCardInfo(uint256 tokenId) external view returns (string memory img, uint256 cardId, uint256 id, address owner) {
         require(tokenId < cardCount, "Index out of bounds");
         Card storage card = cards[tokenId];
-        return (card.img, card.cardNumber, card.id, ownerOf(card.cardNumber));
+        return (card.img, card.cardId, card.id, ownerOf(card.cardId));
     }
 
     function addElement(uint256 tokenId, address seller) external {
         require(ownerOf(tokenId) == seller, "OW1");
         addtomap(cards[tokenId].id, seller);
-        _approve(msg.sender, cards[tokenId].cardNumber, seller);
+        _approve(msg.sender, cards[tokenId].cardId, seller);
     }
 
     function transferCard(uint256 tokenId, uint256 price, address seller, address buyer, uint256 transfer) public payable {
