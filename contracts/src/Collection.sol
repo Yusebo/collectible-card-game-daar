@@ -18,7 +18,7 @@ contract Collection is ERC721, Ownable {
     mapping(uint256 => address) private tokenApprovals;
     mapping(uint256 => address) public onSelling; 
 
-    uint256 private _tokenIds;
+    uint256 private _tokenIds = 0;
 
     struct Card {
         string img;

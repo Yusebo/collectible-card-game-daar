@@ -5,12 +5,12 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 const deployMain: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployments, getNamedAccounts, network } = hre;
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, owner } = await getNamedAccounts();
 
   // Only deploy on local Hardhat network (chainId 31337)
   if (network.config.chainId !== 31337) return;
 
-  console.log(`Deploying Main contract with deployer: ${deployer}`);
+  console.log(`Deploying Main contract with deployer: ${deployer}, ${owner}`);
 
   const mainDeployment = await deploy('Main', {
     from: deployer,

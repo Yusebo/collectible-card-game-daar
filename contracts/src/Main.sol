@@ -77,7 +77,7 @@ contract Main is Ownable {
         CollectionInfo[] memory allCollections = new CollectionInfo[](collectionCount);
     
         for (uint256 i = 0; i < collectionCount; i++) {
-        allCollections[i] = CollectionInfo({
+            allCollections[i] = CollectionInfo({
                 name: collections[i].name,
                 collectionAddress: collections[i].collectionAddress,
                 cardCount: collections[i].cardCount

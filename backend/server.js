@@ -19,12 +19,61 @@ if (!process.env.RPC_URL || !process.env.PRIVATE_KEY ) {
 
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-const contract = new ethers.Contract(process.env.ADDRESSE_CONTRAT, contractAbi, signer);
+const contract = new ethers.Contract(contractAddress, contractAbi, signer);
+
+
+const apiUrl = "https://api.pokemontcg.io/v2/sets/";
+
+async function fetchCardSets() {
+  try {
+    const response = await fetch(apiUrl);
+    
+    // Vérifier si la réponse est OK
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP ! Status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Récupérer tous les ID et les totaux de cartes
+    const sets = data.data.map(set => ({
+      id: set.id,
+      totalCards: set.total
+    }));
+    
+    createCollectionsForSets(sets, contract);
+    console.log(sets);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des ensembles de cartes :", error);
+  }
+}
+
+async function createCollectionsForSets(sets) {
+  for (const set of sets) {
+    const { id, totalCards } = set; // Assurez-vous que id et totalCards sont bien définis
+
+    // Vérifiez que les valeurs sont valides avant d'appeler la fonction
+    if (!id || totalCards === undefined) {
+      console.error(`Invalid set data: ${JSON.stringify(set)}`);
+      continue; // Passer à l'ensemble suivant
+    }
+
+    try {
+      // Créer une collection pour chaque ensemble
+      const tx = await contract.createCollection(id, totalCards);
+      await tx.wait(); // Attendre que la transaction soit minée
+      console.log(`Collection created for set ${id} with total cards: ${totalCards}`);
+    } catch (error) {
+      console.error(`Error creating collection for set ${id}:`, error);
+    }
+  }
+}
 
 
 
-const apiurl = "https://api.pokemontcg.io/v2/"
 
+// Appeler la fonction pour récupérer les ensembles de cartes
+fetchCardSets();
 
 
 app.post('/mint-card', async (req, res) => {
@@ -82,41 +131,7 @@ app.get('/card/:collectionId/:cardId', async (req, res) => {
   }
 });
 
-app.get('/card/:collectionId/:cardId', async (req, res) => {
-    const { collectionId, cardId } = req.params;
-    console.log(collectionId, cardId);
-    try {
-        const nftInfo = await contract.get_card_in_Collection(Number(collectionId), Number(cardId));
-        const nftData = {
-            image: nftInfo.img || "No Image",
-            cardid: `Card #${nftInfo.cardId}`,
-            owner: nftInfo.owner
-        };
-        res.json(nftData);
-    } catch (error) {
-        console.error("Erreur lors de la récupération de la carte:", error);
-        res.status(500).send('Error fetching NFT information');
-    }
-});
 
-
-app.get('/card/:collectionId/:cardId', async (req, res) => {
-  const { collectionId, cardId } = req.params;
-  console.log(collectionId, cardId);
-  try {
-      const nftInfo = await contract.get_card_in_Collection(Number(collectionId), Number(cardId));
-      console.error(nftInfo);
-      const nftData = {
-          image: nftInfo.img || "No Image",
-          cardid: `Card #${nftInfo.cardId}`,
-          owner: nftInfo.owner
-      };
-      res.json(nftData);
-  } catch (error) {
-      console.error("Erreur lors de la récupération de la carte:", error);
-      res.status(500).send('Error fetching NFT information');
-  }
-});
 
 
 app.post('/createcollection', async (req, res) => {
@@ -135,11 +150,11 @@ app.post('/createcollection', async (req, res) => {
 app.get('/collections', async (req, res) => {
   try {
       const collections = await contract.getAllCollections();
-      
+
       const collectionData = collections.map((collection) => ({
           name: collection.name,
           address: collection.collectionAddress,
-          cardCount: collection.cardCount.toNumber(), // Convertir BigNumber en nombre
+          cardCount: collection.cardCount.toNumber(), // Convert BigNumber to a regular number
       }));
 
       res.json(collectionData);
@@ -148,6 +163,7 @@ app.get('/collections', async (req, res) => {
       res.status(500).send('Error fetching collections');
   }
 });
+
 
 
 app.get('/collection/:id', async (req, res) => {

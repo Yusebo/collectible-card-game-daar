@@ -4,6 +4,21 @@ import * as ethereum from '@/lib/ethereum';
 import * as main from '@/lib/main';
 import CreateAndMint from './components/CreateAndMint';
 import FetchComponent from './components/FetchComponent';
+import CollectionList from './components/CollectionList';
+
+interface Card {
+    cardNumber: number;
+    img: string;
+    gid: string; // Using cardId as gid
+    cardOwner: string;
+}
+
+interface Collection {
+    name: string;
+    collectionAddress: string;
+    cardCount: number;
+    cards: Card[];
+}
 
 type Canceler = () => void;
 
@@ -13,7 +28,7 @@ const useAffect = (asyncEffect: () => Promise<Canceler | void>, dependencies: an
     useEffect(() => {
         asyncEffect()
             .then(canceler => (cancelerRef.current = canceler))
-            .catch(error => console.warn('Uncatched error', error));
+            .catch(error => console.warn('Uncaught error', error));
         return () => {
             if (cancelerRef.current) {
                 cancelerRef.current();
@@ -46,14 +61,14 @@ const useWallet = () => {
 // Main App Component
 export const App = () => {
     const wallet = useWallet();
-    const [activeTab, setActiveTab] = useState<'getInfo' | 'createAndMint'>('getInfo');
-    const [card, setCard] = useState<any>(null);
-    const [collection, setCollection] = useState<any>(null);
+    const [activeTab, setActiveTab] = useState<'getInfo' | 'createAndMint' | 'viewCollections'>('getInfo');
+    const [card, setCard] = useState<Card | null>(null);
+    const [collection, setCollection] = useState<Collection | null>(null);
 
     // Fetch Card details
-    const fetchCard = async (collectionId: string, cardId: string) => {
+    const fetchCard = async (collectionId: string, cardId: string): Promise<void> => {
         try {
-            const response = await fetch(`http://localhost:3000/card/${collectionId}/${cardId}`); 
+            const response = await fetch(`http://localhost:3000/card/${collectionId}/${cardId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -61,8 +76,8 @@ export const App = () => {
             setCard({
                 cardNumber: data.cardNumber,
                 img: data.image || "No Image",
-                gid: cardId, // Utiliser le cardId passé
-                cardOwner: data.owner, // Prendre le propriétaire du NFT
+                gid: cardId,
+                cardOwner: data.owner,
             });
         } catch (error) {
             console.error('Error fetching card:', error);
@@ -70,7 +85,7 @@ export const App = () => {
     };
 
     // Fetch Collection details
-    const fetchCollection = async (collectionId: string) => {
+    const fetchCollection = async (collectionId: string): Promise<void> => {
         try {
             const response = await fetch(`http://localhost:3000/collection/${collectionId}`);
             if (!response.ok) {
@@ -84,8 +99,8 @@ export const App = () => {
                 cards: data.cards.map((card: any) => ({
                     cardNumber: card.cardNumber,
                     img: card.img || "No Image",
-                    id: card.id,
-                }))
+                    gid: card.id,
+                })),
             });
         } catch (error) {
             console.error('Error fetching collection:', error);
@@ -93,41 +108,38 @@ export const App = () => {
     };
 
     // Handle collection creation
-
-        const handleCreateCollection = async (name: string, cardCount: number) => {
-            try {
-              const response = await fetch('http://localhost:3000/createcollection', {
+    const handleCreateCollection = async (name: string, cardCount: number): Promise<void> => {
+        try {
+            const response = await fetch('http://localhost:3000/createcollection', {
                 method: 'POST',
                 headers: {
-                  'Content-Type': 'application/json',
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ name, cardCount }),
-              });
-              const data = await response.json();
-              console.log('Collection created:', data);
-            } catch (error) {
-              console.error('Error creating collection:', error);
-            }
-          
+            });
+            const data = await response.json();
+            console.log('Collection created:', data);
+        } catch (error) {
+            console.error('Error creating collection:', error);
+        }
     };
 
     // Handle card minting
-    const handleMintCard = async (collectionId: string, cardId: string) => {
+    const handleMintCard = async (collectionId: string, cardId: string): Promise<void> => {
         try {
-          const response = await fetch('http://localhost:3000/mint-card', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ collectionId, cardId }),
-          });
-          const data = await response.json();
-          console.log('Card minted:', data);
+            const response = await fetch('http://localhost:3000/mint-card', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ collectionId, cardId }),
+            });
+            const data = await response.json();
+            console.log('Card minted:', data);
         } catch (error) {
-          console.error('Error minting card:', error);
+            console.error('Error minting card:', error);
         }
     };
-    
 
     return (
         <div className={styles.body}>
@@ -136,6 +148,7 @@ export const App = () => {
             <div>
                 <button onClick={() => setActiveTab('getInfo')}>Get Info</button>
                 <button onClick={() => setActiveTab('createAndMint')}>Create & Mint</button>
+                <button onClick={() => setActiveTab('viewCollections')}>View Collections</button>
             </div>
 
             {activeTab === 'getInfo' && (
@@ -145,6 +158,8 @@ export const App = () => {
             {activeTab === 'createAndMint' && (
                 <CreateAndMint onCreate={handleCreateCollection} onMint={handleMintCard} />
             )}
+
+            {activeTab === 'viewCollections' && <CollectionList />}
 
             {card && (
                 <div>
@@ -161,7 +176,7 @@ export const App = () => {
                     <p>Card Count: {collection.cardCount}</p>
                     <div>
                         <h4>Cards:</h4>
-                        {collection.cards.map((card: any, index: number) => (
+                        {collection.cards.map((card, index) => (
                             <div key={index}>
                                 <p>Card #{card.cardNumber}</p>
                                 <img src={card.img} alt={`Card ${card.cardNumber}`} width="150" />
