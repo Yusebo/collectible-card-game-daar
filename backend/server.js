@@ -169,20 +169,27 @@ app.post('/createcollection', async (req, res) => {
 // Route pour récupérer toutes les collections
 app.get('/collections', async (req, res) => {
   try {
-      const collections = await contract.getAllCollections();
+    // Appel de la fonction pour obtenir toutes les collections
+    const collections = await contract.getAllCollections();
 
-      const collectionData = collections.map((collection) => ({
-          name: collection.name,
-          address: collection.collectionAddress,
-          cardCount: collection.cardCount.toNumber(), // Convert BigNumber to a regular number
-      }));
+    // Transformer les données de collection en un tableau d'objets lisibles
+    const collectionData = collections.map((collection) => ({
+      name: collection[0], // Le nom de la collection
+      address: collection[1], // L'adresse de la collection
+      cardCount: collection[2].toString(), // Convertir BigNumber en chaîne
+    }));
 
-      res.json(collectionData);
+    // Afficher les données transformées pour le débogage
+    console.log(collectionData);
+
+    // Envoyer les données au client
+    res.json(collectionData);
   } catch (error) {
-      console.error(error);
-      res.status(500).send('Error fetching collections');
+    console.error(error);
+    res.status(500).send('Erreur lors de la récupération des collections');
   }
 });
+
 
 
 
