@@ -38,7 +38,6 @@ async function fetchCardSets() {
     }
     
     const data = await response.json();
-    
     // Récupérer tous les ID et les totaux de cartes
     const sets = data.data.map(set => ({
       id: set.id,
@@ -46,7 +45,6 @@ async function fetchCardSets() {
     }));
     
     createCollectionsForSets(sets, contract);
-    console.log(sets);
   } catch (error) {
     console.error("Erreur lors de la récupération des ensembles de cartes :", error);
   }
@@ -66,7 +64,7 @@ async function createCollectionsForSets(sets) {
       // Créer une collection pour chaque ensemble
       const tx = await contract.createCollection(id, totalCards);
       await tx.wait(); // Attendre que la transaction soit minée
-      console.log(`Collection created for set ${id} with total cards: ${totalCards}`);
+      //console.log(`Collection created for set ${id} with total cards: ${totalCards}`);
     } catch (error) {
       console.error(`Error creating collection for set ${id}:`, error);
     }
@@ -115,8 +113,7 @@ app.get('/card/:collectionId/:cardId', async (req, res) => {
 
   try {
     // Appel de la fonction pour déclencher l'événement
-    await contract.get_card_in_Collection(Number(collectionId), Number(cardId));
-
+    const card = await contract.get_card_in_Collection(Number(collectionId), Number(cardId));
     // Utilisation d'une promesse pour gérer l'événement
     const cardInfo = await new Promise((resolve, reject) => {
       contract.once('CardInfoRetrieved', (collect_id, id_card, img, cardid, id, owner) => {
@@ -148,9 +145,25 @@ app.get('/card/:collectionId/:cardId', async (req, res) => {
   }
 });
 
+// Ajout d'une route pour récupérer toutes les cartes avec leur token et propriétaire
+app.get('/cards-with-owners', async (req, res) => {
+  try {
+    const [allCards, allOwners] = await contract.getAllCardsWithOwner();
 
+    // Formater les données pour un envoi lisible par le frontend
+    const cardsWithOwners = allCards.map((card, index) => ({
+      img: card[0] || "No Image",         // URL de l'image
+      cardNumber: card[1].toString(),      // Numéro de la carte
+      tokenId: card[2].toString(),         // ID du token
+      cardOwner: allOwners[index]          // Adresse du propriétaire
+    }));
 
-
+    res.json(cardsWithOwners);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des cartes avec leurs propriétaires :", error);
+    res.status(500).json({ success: false, message: 'Erreur lors de la récupération des cartes' });
+  }
+});
 
 
 
@@ -189,8 +202,6 @@ app.get('/collections', async (req, res) => {
     res.status(500).send('Erreur lors de la récupération des collections');
   }
 });
-
-
 
 
 app.get('/collection/:id', async (req, res) => {
@@ -273,6 +284,7 @@ app.post('/booster/redeem/:id', async (req, res) => {
   }
 });
 
+/*
 contract.on('CardMinted', async (collectionId, owner, cardId, img, tokenId, event) => {
   try {
     console.log(`Nouvelle carte mintée : Collection ID : ${collectionId}, Propriétaire : ${owner}, ID de la carte : ${cardId}, Image : ${img}, Token ID : ${tokenId}`);
@@ -303,17 +315,7 @@ contract.on('CardInfoRetrieved', async (collect_id, id_card, img, cardid, id, ow
     console.error('Erreur lors de la gestion de l’événement de récupération des informations de la carte :', error);
   }
 });
-
-contract.on('TokenIdCheck', async (collect_id, collectionCount, event) => {
-  try {
-    console.log(`test: Collection ID : ${collect_id}, collectionCount: ${collectionCount}`);
-    
-    // Ajoutez votre logique ici
-    // Par exemple, sauvegarder les informations dans une base de données ou les afficher ailleurs
-  } catch (error) {
-    console.error('Erreur lors de la gestion de l’événement de récupération des informations de la carte :', error);
-  }
-});
+*/
 
 
 app.listen(port, () => {

@@ -5,6 +5,7 @@ import * as main from '@/lib/main';
 import CreateAndMint from './components/CreateAndMint';
 import FetchComponent from './components/FetchComponent';
 import CollectionList from './components/CollectionList';
+import CardsWithOwners from './components/CardsWithOwners';
 
 interface Card {
     cardNumber: number;
@@ -61,7 +62,7 @@ const useWallet = () => {
 // Main App Component
 export const App = () => {
     const wallet = useWallet();
-    const [activeTab, setActiveTab] = useState<'getInfo' | 'createAndMint' | 'viewCollections'>('getInfo');
+    const [activeTab, setActiveTab] = useState<'getInfo' | 'createAndMint' | 'viewCollections' | 'viewCardsWithOwners'>('getInfo');
     const [card, setCard] = useState<Card | null>(null);
     const [collection, setCollection] = useState<Collection | null>(null);
 
@@ -145,22 +146,25 @@ export const App = () => {
     return (
         <div className={styles.body}>
             <h1>Welcome to Pokémon TCG</h1>
-
+    
             <div>
                 <button onClick={() => setActiveTab('getInfo')}>Get Info</button>
                 <button onClick={() => setActiveTab('createAndMint')}>Create & Mint</button>
                 <button onClick={() => setActiveTab('viewCollections')}>View Collections</button>
+                <button onClick={() => setActiveTab('viewCardsWithOwners')}>View Cards With Owners</button>
             </div>
-
+    
             {activeTab === 'getInfo' && (
                 <FetchComponent onFetchCard={fetchCard} onFetchCollection={fetchCollection} />
             )}
-
+    
             {activeTab === 'createAndMint' && (
                 <CreateAndMint onMint={handleMintCard} />
             )}
-
+    
             {activeTab === 'viewCollections' && <CollectionList />}
+    
+            {activeTab === 'viewCardsWithOwners' && <CardsWithOwners />}
 
             {card && (
                 <div>

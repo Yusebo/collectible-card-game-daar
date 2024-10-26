@@ -51,7 +51,7 @@ contract Main is Ownable {
         return (collectionInfo.name, collectionInfo.cardCount, collectionInfo.collectionAddress);
     }
 
-    function get_card_in_Collection(uint256 collect_id, uint256 id_card) public returns (string memory img, uint256 cardid, uint256 id, address owner) {
+    function get_card_in_Collection(uint256 collect_id, uint256 id_card) external returns (string memory img, uint256 cardid, uint256 id, address owner) {
         emit TokenIdCheck(collect_id, collectionCount);
         require(collect_id < collectionCount, "Collection does not exist");
 
@@ -98,6 +98,39 @@ contract Main is Ownable {
         
         return allCollections;
     }
+
+    function getAllCardsWithOwner() external view returns (Collection.Card[] memory, address[] memory) {
+        uint256 totalCards = 0;
+
+        // Calculer le nombre total de cartes
+        for (uint256 i = 0; i < collectionCount; i++) {
+            totalCards += Collection(collections[i].collectionAddress).gettoken();
+        }
+
+        // Créer un tableau dynamique pour stocker toutes les cartes et leurs propriétaires
+        Collection.Card[] memory allCards = new Collection.Card[](totalCards);
+        address[] memory allOwners = new address[](totalCards);
+
+        uint256 index = 0;
+
+        // Parcourir chaque collection pour obtenir les cartes et leurs propriétaires
+        for (uint256 i = 0; i < collectionCount; i++) {
+            Collection collection = Collection(collections[i].collectionAddress);
+
+            for (uint256 j = 0; j < collection.gettoken(); j++) {
+                // Récupérer les informations de la carte et de son propriétaire
+                (string memory img, uint256 cardId, uint256 id, address owner) = collection.getCardInfo(j);
+
+                // Stocker la carte et le propriétaire dans les tableaux
+                allCards[index] = Collection.Card({img: img, cardId: cardId, id: id});
+                allOwners[index] = owner;
+                index++;
+            }
+        }
+
+        return (allCards, allOwners);
+    }
+
 
 
 }
