@@ -5,6 +5,7 @@ interface Collection {
     address: string;
     name: string;
     cardCount: number;
+    img: string
 }
 
 const CollectionList: React.FC = () => {
@@ -55,7 +56,7 @@ const CollectionList: React.FC = () => {
                     {collections.map((collection) => (
                         <li key={collection.address}>
                             <h3>{collection.name}</h3>
-                            <p>Address: {collection.address}</p>
+                            <img src={collection.img}  width="150" />
                             <p>Card Count: {collection.cardCount}</p>
                         </li>
                     ))}

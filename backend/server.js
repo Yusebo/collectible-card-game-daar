@@ -39,12 +39,17 @@ async function fetchCardSets() {
     
     const data = await response.json();
     // Récupérer tous les ID et les totaux de cartes
-    const sets = data.data.map(set => ({
+    const sets = data.data
+    .map(set => ({
       id: set.id,
-      totalCards: set.total
-    }));
+      totalCards: set.total,
+      img: set.images.logo,
+      date: set.releaseDate 
+    }))
+    .sort((a, b) => new Date(a.date) - new Date(b.date)); // Tri par ordre croissant
+  
     
-    createCollectionsForSets(sets, contract);
+    createCollectionsForSets(sets);
   } catch (error) {
     console.error("Erreur lors de la récupération des ensembles de cartes :", error);
   }
@@ -52,7 +57,7 @@ async function fetchCardSets() {
 
 async function createCollectionsForSets(sets) {
   for (const set of sets) {
-    const { id, totalCards } = set; // Assurez-vous que id et totalCards sont bien définis
+    const { id, totalCards, img , date} = set; // Assurez-vous que id et totalCards sont bien définis
 
     // Vérifiez que les valeurs sont valides avant d'appeler la fonction
     if (!id || totalCards === undefined) {
@@ -62,7 +67,7 @@ async function createCollectionsForSets(sets) {
 
     try {
       // Créer une collection pour chaque ensemble
-      const tx = await contract.createCollection(id, totalCards);
+      const tx = await contract.createCollection(id, totalCards, img);
       await tx.wait(); // Attendre que la transaction soit minée
       //console.log(`Collection created for set ${id} with total cards: ${totalCards}`);
     } catch (error) {
@@ -165,20 +170,6 @@ app.get('/cards-with-owners', async (req, res) => {
   }
 });
 
-
-
-app.post('/createcollection', async (req, res) => {
-  const { name, cardCount } = req.body;
-
-  try {
-    const tx = await contract.createCollection(name, cardCount);
-    await tx.wait(); // Attendre que la transaction soit minée
-    res.json({ success: true, transaction: tx });
-  } catch (error) {
-    res.status(500).send('Error creating collection');
-  }
-});
-
 // Route pour récupérer toutes les collections
 app.get('/collections', async (req, res) => {
   try {
@@ -189,11 +180,12 @@ app.get('/collections', async (req, res) => {
     const collectionData = collections.map((collection) => ({
       name: collection[0], // Le nom de la collection
       address: collection[1], // L'adresse de la collection
-      cardCount: collection[2].toString(), // Convertir BigNumber en chaîne
+      cardCount: collection[2].toString(), 
+      img : collection[3]
     }));
 
     // Afficher les données transformées pour le débogage
-    console.log(collectionData);
+
 
     // Envoyer les données au client
     res.json(collectionData);

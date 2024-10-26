@@ -19,6 +19,7 @@ interface Collection {
     collectionAddress: string;
     cardCount: number;
     cards: Card[];
+    img : string;
 }
 
 type Canceler = () => void;
@@ -102,7 +103,9 @@ export const App = () => {
                     cardNumber: card.cardNumber,
                     img: card.img || "No Image",
                     gid: card.id,
+                    
                 })),
+                img :data.img
             });
         } catch (error) {
             console.error('Error fetching collection:', error);

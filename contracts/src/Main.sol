@@ -10,6 +10,7 @@ contract Main is Ownable {
         string name;
         address collectionAddress;
         uint256 cardCount;
+        string img;
     }
 
     CollectionInfo[] public collections;
@@ -26,12 +27,13 @@ contract Main is Ownable {
     }
     
 
-    function createCollection(string memory _name, uint256 _cardCount) external onlyOwner {
+    function createCollection(string memory _name, uint256 _cardCount, string memory _img) external onlyOwner {
         Collection new_collection = new Collection(_name, _cardCount);
         collections.push(CollectionInfo({
             name: _name,
             collectionAddress: address(new_collection),
-            cardCount: _cardCount
+            cardCount: _cardCount,
+            img : _img
         }));
         emit CollectionCreated(_name, address(new_collection ), _cardCount, collectionCount);
         
@@ -92,7 +94,8 @@ contract Main is Ownable {
             allCollections[i] = CollectionInfo({
                 name: collections[i].name,
                 collectionAddress: collections[i].collectionAddress,
-                cardCount: collections[i].cardCount
+                cardCount: collections[i].cardCount,
+                img: collections[i].img
             });
         }
         

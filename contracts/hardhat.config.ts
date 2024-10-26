@@ -7,10 +7,18 @@ import '@typechain/hardhat';
 import 'hardhat-gas-reporter';
 import 'hardhat-abi-exporter';
 
-require('dotenv')
+require('dotenv');
 
 const config: HardhatUserConfig = {
-  solidity: '0.8.20',
+  solidity: {
+    version: '0.8.20',
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200, // You can adjust this value as needed
+      },
+    },
+  },
   paths: {
     deploy: './deploy',
     sources: './src',
