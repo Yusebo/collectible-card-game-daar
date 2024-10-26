@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import styles from './styles.module.css';
+import styles from './css/App.module.css';
 import * as ethereum from '@/lib/ethereum';
 import * as main from '@/lib/main';
 import CreateAndMint from './components/CreateAndMint';
@@ -147,8 +147,9 @@ export const App = () => {
     };
 
     return (
-        <div className={styles.body}>
-            <h1>Welcome to Pokémon TCG</h1>
+        <div className={styles.app}>
+            <h1>
+            <img src="../public/logo.png" alt="Pokémon TCG" className="logo" />
     
             <div>
                 <button onClick={() => setActiveTab('getInfo')}>Get Info</button>
@@ -156,7 +157,10 @@ export const App = () => {
                 <button onClick={() => setActiveTab('viewCollections')}>View Collections</button>
                 <button onClick={() => setActiveTab('viewCardsWithOwners')}>View Cards With Owners</button>
             </div>
-    
+
+            </h1>
+
+            <div className={styles.body}>
             {activeTab === 'getInfo' && (
                 <FetchComponent onFetchCard={fetchCard} onFetchCollection={fetchCollection} />
             )}
@@ -194,6 +198,7 @@ export const App = () => {
                 </div>
             )}
         </div>
+    </div>
     );
 };
 
