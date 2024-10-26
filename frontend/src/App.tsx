@@ -73,6 +73,7 @@ export const App = () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
+            console.log(data)
             setCard({
                 cardNumber: data.cardNumber,
                 img: data.image || "No Image",
@@ -156,7 +157,7 @@ export const App = () => {
             )}
 
             {activeTab === 'createAndMint' && (
-                <CreateAndMint onCreate={handleCreateCollection} onMint={handleMintCard} />
+                <CreateAndMint onMint={handleMintCard} />
             )}
 
             {activeTab === 'viewCollections' && <CollectionList />}

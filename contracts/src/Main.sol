@@ -15,7 +15,10 @@ contract Main is Ownable {
     CollectionInfo[] public collections;
     uint256 public collectionCount;
 
-    event CollectionCreated(string name, address indexed collectionAddress, uint256 cardCount);
+    event CollectionCreated(string name, address indexed collectionAddress, uint256 cardCount, uint256 collection_id);
+    event CardMinted(uint256 collectionId, address indexed owner, uint256 cardId, string img, uint256 tokenId);
+    event CardInfoRetrieved(uint256 collect_id, uint256 id_card, string img, uint256 cardid, uint256 id, address owner);
+    event TokenIdCheck(uint256 collect_id, uint256 collectionCount);
 
     constructor(address _owner) Ownable(msg.sender) {
         require(_owner != address(0), "Owner address cannot be zero");
@@ -30,7 +33,7 @@ contract Main is Ownable {
             collectionAddress: address(new_collection),
             cardCount: _cardCount
         }));
-        emit CollectionCreated(_name, address(new_collection ), _cardCount);
+        emit CollectionCreated(_name, address(new_collection ), _cardCount, collectionCount);
         
         collectionCount++;
     }
@@ -39,6 +42,7 @@ contract Main is Ownable {
         CollectionInfo storage collectionInfo = collections[collect_id];
         require(collect_id < collectionCount, "list null");
         Collection(collectionInfo.collectionAddress).mintCard(img, id);
+        emit CardMinted(collect_id, msg.sender, id, img, Collection(collectionInfo.collectionAddress).gettoken() - 1);
     }
 
     function getCollection(uint256 _id) external view returns (string memory, uint256, address) {
@@ -47,13 +51,21 @@ contract Main is Ownable {
         return (collectionInfo.name, collectionInfo.cardCount, collectionInfo.collectionAddress);
     }
 
-    function get_card_in_Collection(uint256 collect_id, uint256 id_card) public view returns (string memory img, uint256 cardid, uint256 id, address owner) {
+    function get_card_in_Collection(uint256 collect_id, uint256 id_card) public returns (string memory img, uint256 cardid, uint256 id, address owner) {
+        emit TokenIdCheck(collect_id, collectionCount);
         require(collect_id < collectionCount, "Collection does not exist");
 
         CollectionInfo storage collectionInfo = collections[collect_id];
-        return Collection(collectionInfo.collectionAddress).getCardInfo(id_card);
-    }
 
+        if (id_card >= collectionInfo.cardCount) {
+            revert("Card does not exist in this collection");
+        }
+        (img, cardid, id, owner) = Collection(collectionInfo.collectionAddress).getCardInfo(id_card);
+
+        emit CardInfoRetrieved(collect_id, id_card, img, cardid, id, owner);
+        return (img, cardid, id, owner);
+    }
+    
     function get_all_card_in_Collection(uint256 collect_id) external view returns (Collection.Card[] memory) {
         require(collect_id < collectionCount, "Collection does not exist");
         Collection collection = Collection(collections[collect_id].collectionAddress);

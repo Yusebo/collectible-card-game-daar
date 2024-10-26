@@ -24,6 +24,10 @@ const contract = new ethers.Contract(contractAddress, contractAbi, signer);
 
 const apiUrl = "https://api.pokemontcg.io/v2/sets/";
 
+const cardData = {}; 
+const collectionData = {};
+
+
 async function fetchCardSets() {
   try {
     const response = await fetch(apiUrl);
@@ -108,28 +112,44 @@ app.post('/mint-card', async (req, res) => {
 
 app.get('/card/:collectionId/:cardId', async (req, res) => {
   const { collectionId, cardId } = req.params;
-  console.log('Collection ID:', collectionId);
-  console.log('Card ID:', cardId);
-  
-  try {
-    const nftInfo = await contract.get_card_in_Collection(Number(collectionId), Number(cardId));
-    
-    if (!nftInfo) {
-      return res.status(404).send('Card not found in the collection');
-    }
 
-    const nftData = {
-      image: nftInfo.img || "No Image",
-      cardid: `Card #${nftInfo.cardId}`,
-      owner: nftInfo.owner
-    };
-    
-    res.json(nftData);
+  try {
+    // Appel de la fonction pour déclencher l'événement
+    await contract.get_card_in_Collection(Number(collectionId), Number(cardId));
+
+    // Utilisation d'une promesse pour gérer l'événement
+    const cardInfo = await new Promise((resolve, reject) => {
+      contract.once('CardInfoRetrieved', (collect_id, id_card, img, cardid, id, owner) => {
+        // Vérifie que les ID de collection et de carte correspondent
+        if (collect_id.toString() === collectionId && id_card.toString() === cardId) {
+          // Formatage des données à renvoyer
+          resolve({
+            collectionId: collect_id.toString(), // Converti en chaîne
+            cardId: id_card.toString(), // Converti en chaîne
+            image: img || "No Image",
+            cardNumber: cardid.toString(), // Converti en chaîne
+            tokenId: id.toString(), // Converti en chaîne
+            owner: owner
+          });
+        }
+      });
+
+      // Timeout au cas où l'événement ne serait pas émis
+      setTimeout(() => {
+        reject(new Error("Timeout: CardInfoRetrieved event not emitted"));
+      }, 5000); // 5 secondes de timeout
+    });
+
+    // Envoi des informations de carte au client
+    res.json(cardInfo);
   } catch (error) {
     console.error("Erreur lors de la récupération de la carte:", error);
-    res.status(500).send('Error fetching NFT information');
+    res.status(500).send('Erreur lors de la récupération des informations de la carte');
   }
 });
+
+
+
 
 
 
@@ -243,6 +263,48 @@ app.post('/booster/redeem/:id', async (req, res) => {
     res.json({ success: true, transaction: tx });
   } catch (error) {
     res.status(500).send('Error redeeming booster');
+  }
+});
+
+contract.on('CardMinted', async (collectionId, owner, cardId, img, tokenId, event) => {
+  try {
+    console.log(`Nouvelle carte mintée : Collection ID : ${collectionId}, Propriétaire : ${owner}, ID de la carte : ${cardId}, Image : ${img}, Token ID : ${tokenId}`);
+
+  } catch (error) {
+    console.error('Erreur lors de la gestion de l’événement de minting de carte:', error);
+  }
+});
+
+
+contract.on('CollectionCreated', async (name, collectionAddress, cardCount, collectionCount, event) => {
+  try {
+    console.log(`Nouvelle collection créée : ${name}, Adresse : ${collectionAddress}, Nombre de cartes : ${cardCount}, id ${collectionCount}`);
+    
+    // Ajoutez votre logique de gestion ici
+    // Par exemple, sauvegarder dans une base de données ou notifier d'autres services
+    
+  } catch (error) {
+    console.error('Erreur lors de la gestion de l’événement de création de collection:', error);
+  }
+});
+
+contract.on('CardInfoRetrieved', async (collect_id, id_card, img, cardid, id, owner, event) => {
+  try {
+    console.log(`Informations de la carte récupérées : Collection ID : ${collect_id}, Carte ID : ${id_card}, Image : ${img}, Card ID : ${cardid}, ID : ${id}, Propriétaire : ${owner}`);
+
+  } catch (error) {
+    console.error('Erreur lors de la gestion de l’événement de récupération des informations de la carte :', error);
+  }
+});
+
+contract.on('TokenIdCheck', async (collect_id, collectionCount, event) => {
+  try {
+    console.log(`test: Collection ID : ${collect_id}, collectionCount: ${collectionCount}`);
+    
+    // Ajoutez votre logique ici
+    // Par exemple, sauvegarder les informations dans une base de données ou les afficher ailleurs
+  } catch (error) {
+    console.error('Erreur lors de la gestion de l’événement de récupération des informations de la carte :', error);
   }
 });
 

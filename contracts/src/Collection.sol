@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-
 contract Collection is ERC721, Ownable {
     string public collectionName;
     uint256 public cardCount;
@@ -16,40 +15,35 @@ contract Collection is ERC721, Ownable {
 
     mapping(uint256 => Card) public cards;
     mapping(uint256 => address) private tokenApprovals;
-    mapping(uint256 => address) public onSelling; 
+    mapping(uint256 => address) public onSelling;
 
     uint256 private _tokenIds = 0;
 
     struct Card {
         string img;
         uint256 cardId;
-        uint256 id;// token
+        uint256 id; // token
     }
 
     function mintCard(string memory img, uint256 _cardid) external {
         uint256 newCardId = _tokenIds;
         _mint(msg.sender, newCardId);
-        
-        Card memory newCard = Card({cardId:  _cardid, img: img, id: newCardId});
+
+        Card memory newCard = Card({cardId: _cardid, img: img, id: newCardId});
         cards[newCardId] = newCard;
-        
+
         _tokenIds++;
     }
 
-    function mintCardtoOther(string memory img, address to) external {
-        uint256 newCardId = _tokenIds;
-        _mint(to, newCardId);
-        
-        Card memory newCard = Card({cardId: newCardId, img: img, id: _tokenIds});
-        cards[newCardId] = newCard;
-        
-        _tokenIds++;
+
+    function gettoken() external view returns (uint256 token) {
+        return _tokenIds;
     }
 
     function getCardInfo(uint256 tokenId) external view returns (string memory img, uint256 cardId, uint256 id, address owner) {
-        require(tokenId < cardCount, "Index out of bounds");
+        require(tokenId < _tokenIds, "Index out of bounds");
         Card storage card = cards[tokenId];
-        return (card.img, card.cardId, card.id, ownerOf(card.cardId));
+        return (card.img, card.cardId, card.id, ownerOf(card.id));
     }
 
     function addElement(uint256 tokenId, address seller) external {
@@ -68,10 +62,10 @@ contract Collection is ERC721, Ownable {
         onSelling[_key] = _owner;
     }
 
-    function gettomap(uint256 _key) public view returns (address ) {
+    function gettomap(uint256 _key) public view returns (address) {
         return onSelling[_key];
     }
-    
+
     function removetomap(uint256 _key) public {
         delete onSelling[_key];
     }
