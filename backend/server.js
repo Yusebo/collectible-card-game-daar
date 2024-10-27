@@ -107,7 +107,7 @@ fetchCardSets();
 app.post('/mint-card', async (req, res) => {
   const { collectionId, cardId,  set} = req.body;
   const apiUrl = `https://api.pokemontcg.io/v2/cards/${set}-${cardId}`;
-  console.log(apiUrl, set, cardId);
+  console.log(apiUrl, collectionId, set, cardId);
   try {
     const response = await fetch(apiUrl);
     

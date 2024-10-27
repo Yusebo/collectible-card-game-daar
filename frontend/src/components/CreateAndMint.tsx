@@ -23,7 +23,7 @@ const CreateAndMint: React.FC<{ onMint: (collectionId: string, cardId: string, s
 
     const handleMintSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const index = sets.findIndex(set => set.address === selectedSet);
+        const index = sets.findIndex(set => set.name === selectedSet);
         const updatedCollectionId = index !== -1 ? index.toString() : ''; // Use the index as collectionId
         console.log(updatedCollectionId)
         onMint(updatedCollectionId, cardId, selectedSet);
