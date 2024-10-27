@@ -23,29 +23,27 @@ const CollectionList: React.FC = () => {
     const [cards, setCards] = useState<Card[]>([]);
     const [loadingCards, setLoadingCards] = useState(false);
 
-    useEffect(() => {
-        const fetchCollections = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/collections');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data: Collection[] = await response.json();
-                setCollections(data);
-            } catch (error: unknown) {
-                if (error instanceof Error) {
-                    console.error('Error fetching collections:', error);
-                    setError(error.message);
-                } else {
-                    setError('An unexpected error occurred');
-                }
-            } finally {
-                setLoading(false);
+    const fetchCollections = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/collections');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        };
+            const data: Collection[] = await response.json();
+            setCollections(data);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error('Error fetching collections:', error);
+                setError(error.message);
+            } else {
+                setError('An unexpected error occurred');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        fetchCollections();
-    }, []);
+    fetchCollections();
 
     const fetchCards = async (collection: Collection) => {
         setLoadingCards(true);
@@ -98,26 +96,21 @@ const CollectionList: React.FC = () => {
                     )}
                 </div>
             ) : (
-                <div>
-                    <h2>All Sets</h2>
-                    {collections.length === 0 ? (
-                        <p>No set found.</p>
-                    ) : (
-                        <div className={styles.grid}>
-                            {collections.map((collection) => (
-                                <div
-                                    key={collection.address}
-                                    className={styles.collectionItem}
-                                    onClick={() => fetchCards(collection)}
-                                >
-                                    <h3>{collection.name}</h3>
-                                    <img src={collection.img} alt={collection.name} className={styles.collectionImage} />
-                                    <p>Card Count: {collection.cardCount}</p>
-                                </div>
-                            ))}
+                <div className={styles.grid}>
+                    {collections.map((collection) => (
+                        <div
+                            key={collection.address}
+                            className={styles.collectionItem}
+                            onClick={() => fetchCards(collection)}
+                        >
+                            <h3>{collection.name}</h3>
+                            <img src={collection.img} alt={collection.name} className={styles.collectionImage} />
+                            <p>Card Count: {collection.cardCount}</p>
                         </div>
-                    )}
+                    ))}
                 </div>
+
+
             )}
         </div>
     );
