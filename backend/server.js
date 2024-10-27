@@ -90,7 +90,8 @@ async function fetchCardsfromSet(setId) {
     const cards = data.data.map(card => ({
       id: card.id,
       name: card.name,
-      img: card.images.small || "No Image"
+      img: card.images.small || "No Image",
+      number: card.number
     }));
 
     return cards;
