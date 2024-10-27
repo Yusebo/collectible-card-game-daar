@@ -66,24 +66,25 @@ export const App = () => {
     const [activeTab, setActiveTab] = useState<'getInfo' | 'createAndMint' | 'viewCollections' | 'viewCardsWithOwners'>('getInfo');
     const [card, setCard] = useState<Card | null>(null);
     const [collection, setCollection] = useState<Collection | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     // Fetch Card details
     const fetchCard = async (collectionId: string, cardId: string): Promise<void> => {
+        setLoading(true);
+        setError(null);
         try {
             const response = await fetch(`http://localhost:3000/card/${collectionId}/${cardId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            console.log(data)
-            setCard({
-                cardNumber: data.cardNumber,
-                img: data.image || "No Image",
-                gid: cardId,
-                cardOwner: data.owner,
-            });
+            setCard(data);
         } catch (error) {
             console.error('Error fetching card:', error);
+            setError('Failed to fetch card details.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -173,6 +174,7 @@ export const App = () => {
     
             {activeTab === 'viewCardsWithOwners' && <CardsWithOwners />}
 
+            {loading && <p>Loading card details...</p>}
             {card && (
                 <div>
                     <h3>Card #{card.cardNumber}</h3>

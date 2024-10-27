@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import styles from '../css/CollectionList.module.css';
 
 // Define the Collection interface
 interface Collection {
@@ -47,20 +48,20 @@ const CollectionList: React.FC = () => {
     }
 
     return (
-        <div>
+        <div className={styles.container}>
             <h2>All Collections</h2>
             {collections.length === 0 ? (
                 <p>No collections found.</p>
             ) : (
-                <ul>
+                <div className={styles.grid}>
                     {collections.map((collection) => (
-                        <li key={collection.address}>
+                        <div key={collection.address} className={styles.collectionItem}>
                             <h3>{collection.name}</h3>
-                            <img src={collection.img}  width="150" />
+                            <img src={collection.img} alt={collection.name} className={styles.collectionImage} />
                             <p>Card Count: {collection.cardCount}</p>
-                        </li>
+                        </div>
                     ))}
-                </ul>
+                </div>
             )}
         </div>
     );
