@@ -11,9 +11,12 @@ of CCG cards as NFT, create a marketplace for players to exchange NFT, and run a
 * [@Younes Chetouani](https://github.com/younesctn) 28632942
 
 # Demo
-video here
+
 
 # Installation
+
+https://github.com/user-attachments/assets/a02ca596-2371-49cb-b390-95d61ba8adb7
+
 
 ```bash
 # With HTTPS
