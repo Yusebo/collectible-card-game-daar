@@ -152,7 +152,7 @@ export const App = () => {
             <img src="../public/logo.png" alt="Pokémon TCG" className="logo" />
     
             <div>
-                <button onClick={() => setActiveTab('viewCollections')}>View Collections</button>
+                <button onClick={() => setActiveTab('viewCollections')}>Encyclopedia</button>
                 <button onClick={() => setActiveTab('createAndMint')}>Create & Mint</button>
                 <button onClick={() => setActiveTab('viewCardsWithOwners')}>View Cards With Owners</button>
             </div>
