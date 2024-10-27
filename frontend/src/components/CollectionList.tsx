@@ -43,7 +43,9 @@ const CollectionList: React.FC = () => {
         }
     };
 
-    fetchCollections();
+    useEffect(() => {
+        fetchCollections();
+    }, []);
 
     const fetchCards = async (collection: Collection) => {
         setLoadingCards(true);
