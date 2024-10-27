@@ -99,9 +99,9 @@ const CollectionList: React.FC = () => {
                 </div>
             ) : (
                 <div>
-                    <h2>All Collections</h2>
+                    <h2>All Sets</h2>
                     {collections.length === 0 ? (
-                        <p>No collections found.</p>
+                        <p>No set found.</p>
                     ) : (
                         <div className={styles.grid}>
                             {collections.map((collection) => (
