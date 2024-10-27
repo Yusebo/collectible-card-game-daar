@@ -3,7 +3,6 @@ import styles from './css/App.module.css';
 import * as ethereum from '@/lib/ethereum';
 import * as main from '@/lib/main';
 import CreateAndMint from './components/CreateAndMint';
-import FetchComponent from './components/FetchComponent';
 import CollectionList from './components/CollectionList';
 import CardsWithOwners from './components/CardsWithOwners';
 
@@ -63,7 +62,7 @@ const useWallet = () => {
 // Main App Component
 export const App = () => {
     const wallet = useWallet();
-    const [activeTab, setActiveTab] = useState<'getInfo' | 'createAndMint' | 'viewCollections' | 'viewCardsWithOwners'>('getInfo');
+    const [activeTab, setActiveTab] = useState<'createAndMint' | 'viewCollections' | 'viewCardsWithOwners'>('viewCollections');
     const [card, setCard] = useState<Card | null>(null);
     const [collection, setCollection] = useState<Collection | null>(null);
     const [loading, setLoading] = useState(false);
@@ -153,18 +152,14 @@ export const App = () => {
             <img src="../public/logo.png" alt="Pokémon TCG" className="logo" />
     
             <div>
-                <button onClick={() => setActiveTab('getInfo')}>Get Info</button>
-                <button onClick={() => setActiveTab('createAndMint')}>Create & Mint</button>
                 <button onClick={() => setActiveTab('viewCollections')}>View Collections</button>
+                <button onClick={() => setActiveTab('createAndMint')}>Create & Mint</button>
                 <button onClick={() => setActiveTab('viewCardsWithOwners')}>View Cards With Owners</button>
             </div>
 
             </h1>
 
             <div className={styles.body}>
-            {activeTab === 'getInfo' && (
-                <FetchComponent onFetchCard={fetchCard} onFetchCollection={fetchCollection} />
-            )}
     
             {activeTab === 'createAndMint' && (
                 <CreateAndMint onMint={handleMintCard} />

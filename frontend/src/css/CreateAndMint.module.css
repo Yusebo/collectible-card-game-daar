@@ -27,9 +27,3 @@ select, input[type="text"] {
     border-radius: 4px;
     font-size: 16px; /* Slightly larger font */
 }
-
-.error {
-    color: red;
-    text-align: center;
-    margin-top: 10px;
-}
