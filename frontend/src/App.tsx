@@ -131,14 +131,14 @@ export const App = () => {
     };
 
     // Handle card minting
-    const handleMintCard = async (collectionId: string, cardId: string): Promise<void> => {
+    const handleMintCard = async (collectionId: string, cardId: string, set: string): Promise<void> => {
         try {
             const response = await fetch('http://localhost:3000/mint-card', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ collectionId, cardId }),
+                body: JSON.stringify({ collectionId, cardId, set }),
             });
             const data = await response.json();
             console.log('Card minted:', data);

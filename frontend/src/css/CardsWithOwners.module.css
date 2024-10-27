@@ -1,0 +1,46 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.cardItem {
+    width: 200px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    background-color: #f9f9f9;
+    min-height: 250px; /* Minimum height to ensure content fits */
+    overflow-wrap: break-word; /* Ensures long text wraps within the block */
+}
+
+.cardItem:hover {
+    transform: scale(1.05);
+}
+
+.cardImage {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.cardOwner {
+    font-size: 14px;
+    color: #333;
+    margin-top: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Truncate text if too long */
+}

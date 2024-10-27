@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import styles from '../css/CardsWithOwners.module.css';
 
 interface CardOwner {
     cardNumber: number;
@@ -30,13 +31,13 @@ export const CardsWithOwners = () => {
     }, []);
 
     return (
-        <div>
+        <div className={styles.container}>
             <h2>All Cards with Owners</h2>
-            <div>
+            <div className={styles.grid}>
                 {cardsWithOwners.map((card) => (
-                    <div key={card.tokenId}>
+                    <div key={card.tokenId} className={styles.cardItem}>
                         <p>Card #{card.cardNumber}</p>
-                        <img src={card.img} alt={`Card ${card.cardNumber}`} width="150" />
+                        <img src={card.img} alt={`Card ${card.cardNumber}`} className={styles.cardImage} />
                         <p>Owner: {card.cardOwner}</p>
                         <p>Token ID: {card.tokenId}</p>
                     </div>

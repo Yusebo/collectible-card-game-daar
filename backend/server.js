@@ -76,7 +76,28 @@ async function createCollectionsForSets(sets) {
   }
 }
 
+async function fetchCardsfromSet(setId) {
+  const apiUrl = `https://api.pokemontcg.io/v2/cards?q=set.id:${setId}`;
 
+  try {
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP ! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const cards = data.data.map(card => ({
+      id: card.id,
+      name: card.name,
+      img: card.images.small || "No Image"
+    }));
+
+    return cards;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des cartes de l'ensemble :", error);
+  }
+}
 
 
 // Appeler la fonction pour récupérer les ensembles de cartes
@@ -84,9 +105,9 @@ fetchCardSets();
 
 
 app.post('/mint-card', async (req, res) => {
-  const { collectionId, cardId } = req.body;
-  const apiUrl = `https://api.pokemontcg.io/v2/cards/base1-${cardId}`;
-
+  const { collectionId, cardId,  set} = req.body;
+  const apiUrl = `https://api.pokemontcg.io/v2/cards/${set}-${cardId}`;
+  console.log(apiUrl, set, cardId);
   try {
     const response = await fetch(apiUrl);
     
@@ -149,6 +170,19 @@ app.get('/card/:collectionId/:cardId', async (req, res) => {
     res.status(500).send('Erreur lors de la récupération des informations de la carte');
   }
 });
+
+app.get('/collection/cards/:id', async (req, res) => {
+  const collectionId = req.params.id;
+  try {
+    const response = await fetchCardsfromSet(collectionId);
+    res.json(response);
+  }
+  catch (error) {
+    console.error("Erreur lors de la récupération des cartes de la collection :", error);
+    res.status(500).send('Erreur lors de la récupération des cartes de la collection');
+  }
+});
+
 
 // Ajout d'une route pour récupérer toutes les cartes avec leur token et propriétaire
 app.get('/cards-with-owners', async (req, res) => {
@@ -236,78 +270,7 @@ app.get('/booster/:id', async (req, res) => {
   }
 });
 
-// Route pour créer un booster
-app.post('/createbooster', async (req, res) => {
-  const { set, total_card, set_card, img, price } = req.body;
 
-  try {
-    const tx = await contract.createBooster(set, set_card, total_card, img, ethers.utils.parseEther(price));
-    await tx.wait(); // Attendre que la transaction soit minée
-    res.json({ success: true, transaction: tx });
-  } catch (error) {
-    res.status(500).send('Error creating booster');
-  }
-});
-
-// Route pour ouvrir un booster
-app.post('/booster/open/:id', async (req, res) => {
-  const boosterId = req.params.id;
-
-  try {
-    const tx = await boosterContract.openBooster(boosterId);
-    await tx.wait();
-    res.json({ success: true, transaction: tx });
-  } catch (error) {
-    res.status(500).send('Error opening booster');
-  }
-});
-
-// Route pour échanger un booster
-app.post('/booster/redeem/:id', async (req, res) => {
-  const boosterId = req.params.id;
-  const { to, value } = req.body;
-
-  try {
-    const tx = await boosterContract.redeemBooster(boosterId, to, { value: ethers.utils.parseEther(value) });
-    await tx.wait();
-    res.json({ success: true, transaction: tx });
-  } catch (error) {
-    res.status(500).send('Error redeeming booster');
-  }
-});
-
-/*
-contract.on('CardMinted', async (collectionId, owner, cardId, img, tokenId, event) => {
-  try {
-    console.log(`Nouvelle carte mintée : Collection ID : ${collectionId}, Propriétaire : ${owner}, ID de la carte : ${cardId}, Image : ${img}, Token ID : ${tokenId}`);
-
-  } catch (error) {
-    console.error('Erreur lors de la gestion de l’événement de minting de carte:', error);
-  }
-});
-
-
-contract.on('CollectionCreated', async (name, collectionAddress, cardCount, collectionCount, event) => {
-  try {
-    console.log(`Nouvelle collection créée : ${name}, Adresse : ${collectionAddress}, Nombre de cartes : ${cardCount}, id ${collectionCount}`);
-    
-    // Ajoutez votre logique de gestion ici
-    // Par exemple, sauvegarder dans une base de données ou notifier d'autres services
-    
-  } catch (error) {
-    console.error('Erreur lors de la gestion de l’événement de création de collection:', error);
-  }
-});
-
-contract.on('CardInfoRetrieved', async (collect_id, id_card, img, cardid, id, owner, event) => {
-  try {
-    console.log(`Informations de la carte récupérées : Collection ID : ${collect_id}, Carte ID : ${id_card}, Image : ${img}, Card ID : ${cardid}, ID : ${id}, Propriétaire : ${owner}`);
-
-  } catch (error) {
-    console.error('Erreur lors de la gestion de l’événement de récupération des informations de la carte :', error);
-  }
-});
-*/
 
 
 app.listen(port, () => {

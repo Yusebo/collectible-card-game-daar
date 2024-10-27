@@ -33,16 +33,6 @@ const FetchComponent: React.FC<FetchComponentProps> = ({ onFetchCard, onFetchCol
                     setCollectioncard(''); 
                 }}>Fetch Card</button>
             </div>
-            <div>
-            <h3>Fetch Collection Info</h3>
-                <input
-                    type="text"
-                    placeholder="Enter Collection ID"
-                    value={collectionId}
-                    onChange={(e) => setCollectionId(e.target.value)}
-                />
-                <button onClick={() => { onFetchCollection(collectionId); setCollectionId(''); }}>Fetch Collection</button>
-            </div>
         </div>
     );
 };

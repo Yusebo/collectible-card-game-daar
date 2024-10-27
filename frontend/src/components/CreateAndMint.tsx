@@ -1,26 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import styles from '../css/CreateAndMint.module.css'; // Assurez-vous que le chemin est correct
 
-const CreateAndMint: React.FC<{onMint: (collectionId: string, cardId: string) => void; }> = ({  onMint }) => {
+const CreateAndMint: React.FC<{ onMint: (collectionId: string, cardId: string, set: string) => void; }> = ({ onMint }) => {
     const [name, setName] = useState('');
     const [count, setCount] = useState(0);
-    const [collectionId, setCollectionId] = useState('');
+    const [sets, setSets] = useState<{ name: string; address: string }[]>([]);
     const [cardId, setCardId] = useState('');
+    const [selectedSet, setSelectedSet] = useState(''); // Define selectedSet
 
+    useEffect(() => {
+        const fetchSets = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/collections');
+                const data = await response.json();
+                setSets(data);
+            } catch (error) {
+                console.error('Error fetching sets:', error);
+            }
+        };
+        fetchSets();
+    }, []);
 
     const handleMintSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onMint(collectionId, cardId);
-        setCollectionId('');
+        const index = sets.findIndex(set => set.address === selectedSet);
+        const updatedCollectionId = index !== -1 ? index.toString() : ''; // Use the index as collectionId
+        console.log(updatedCollectionId)
+        onMint(updatedCollectionId, cardId, selectedSet);
         setCardId('');
+        setSelectedSet(''); // Reset the selected set after minting
     };
 
     return (
-        <div>
+        <div className={styles.container}>
             <form onSubmit={handleMintSubmit}>
                 <h2>Mint Card</h2>
                 <label>
-                    Collection ID:
-                    <input type="text" value={collectionId} onChange={(e) => setCollectionId(e.target.value)} required />
+                    Select Set:
+                    <select value={selectedSet} onChange={(e) => setSelectedSet(e.target.value)}>
+                        <option value="">Select a set</option>
+                        {sets.map((set, index) => (
+                            <option key={set.address} value={set.name}>{set.name}</option>
+                        ))}
+                    </select>
                 </label>
                 <label>
                     Card ID:

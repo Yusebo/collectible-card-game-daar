@@ -24,6 +24,10 @@
     background-color: #f9f9f9;
 }
 
+h2 {
+    text-align: center;
+}
+
 .collectionItem:hover {
     transform: scale(1.05);
 }
@@ -31,4 +35,49 @@
 .collectionImage {
     max-width: 100%;
     border-radius: 8px;
+}
+
+/* Grille des cartes avec 4 colonnes */
+.gridcards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Quatre colonnes */
+    gap: 30px; /* Espace entre les cartes */
+    width: 100%;
+    max-width: 1200px;
+    justify-items: center; /* Centre les éléments dans chaque colonne */
+}
+
+/* Style des éléments de carte */
+.cardItem {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    padding: 20px; /* Augmenté pour plus d'espace */
+    transition: transform 0.2s ease;
+    width: 250px; /* Largeur fixe pour les cartes */
+    height: 400px; /* Hauteur fixe pour les cartes */
+}
+
+.cardItem:hover {
+    transform: translateY(-5px);
+}
+
+/* Image de carte */
+.cardImage {
+    width: 100%;
+    height: auto;
+    max-height: 350px; /* Hauteur de l'image, peut être ajustée */
+    object-fit: cover;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.collectionLogo {
+    width: 200px; /* Largeur du logo */
+    height: auto; /* Hauteur automatique pour garder les proportions */
+    margin-right: 10px; /* Espace entre le logo et le texte */
+    vertical-align: middle; /* Aligne le logo avec le texte */
 }
